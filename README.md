@@ -1,24 +1,15 @@
-# fetching
+# Fetching in Vue 3
+> Different composables for fetching and caching data in Vue 3
 
-## Project setup
-```
-npm install
-```
+All examples are fetching a list of Posts from [JSON placeholder](https://jsonplaceholder.typicode.com/posts). Here's an interface for a post object:
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
+```ts
+interface Post {
+  userId: number;
+  id: number;
+  title: string;
+  body: string;
+}
 ```
 
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+## One
