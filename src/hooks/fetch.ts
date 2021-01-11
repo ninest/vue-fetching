@@ -8,9 +8,7 @@ export function useFetch<T>(url: RequestInfo) {
   const request = async (): Promise<void> => {
     isLoading.value = true;
     try {
-      const response = await fetch(
-        url + `&userId=${Math.floor(Math.random() * 6) + 1}`
-      );
+      const response = await fetch(url);
       data.value = await response.json();
     } catch (e) {
       error.value = e;
@@ -21,3 +19,6 @@ export function useFetch<T>(url: RequestInfo) {
 
   return { data, error, isLoading, request };
 }
+
+
+// + `&userId=${Math.floor(Math.random() * 6) + 1}`
