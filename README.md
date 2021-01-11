@@ -1,6 +1,6 @@
 # Fetching in Vue 3
 
-> Different composables for fetching and caching data in Vue 3
+> Data fetching composable/hook function for Vue 3
 
 All examples are fetching a list of Posts from [JSON placeholder](https://jsonplaceholder.typicode.com/posts). Here's an interface for a post object:
 
@@ -119,6 +119,6 @@ export default defineComponent({
 
 Also see `src/App.vue`.
 
-## Things
+## Explanation / Issues
 - Calling `rerequest()` from `usePosts()` updates the data in the current component and the posts cache
 - When `rerequest()` is called, the data in the current component is updated, but exisitng data in other components does not get updated
