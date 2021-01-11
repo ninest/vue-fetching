@@ -1,27 +1,53 @@
-<script setup lang="ts">
-import { usePosts } from "./hooks/use-posts";
-// import { useFetch } from "@/hooks/use-fetch";
-import { Post } from "@/post-interface";
+<script lang="ts">
+import { defineComponent, ref } from "vue";
+import { usePosts } from "./hooks/posts";
 
-const { posts, error, isLoading } = usePosts();
+import Another from "@/components/Another.vue";
 
-// const { data: posts, error, isLoading } = useFetch<Post[]>(
-//   "https://jsonplaceholder.typicode.com/posts"
-// );
+export default defineComponent({
+  components: { Another },
+  setup() {
+    const { posts, error, isLoading, rerequest } = usePosts();
+
+    const showAnotherComponent = ref(false);
+    const toggleShowAnotherComponent = () => {
+      console.log("toggle");
+      showAnotherComponent.value = !showAnotherComponent.value;
+    };
+
+    return {
+      posts,
+      error,
+      isLoading,
+      rerequest,
+
+      showAnotherComponent,
+      toggleShowAnotherComponent
+    };
+  }
+});
 </script>
 
 <template>
   <div>
-    <h2 v-if="isLoading">Loading ...</h2>
+    <div>Loading: {{ isLoading }}</div>
 
-    <div v-if="posts">
-      <h1>Posts</h1>
-      <pre>{{ posts }}</pre>
+    <div>
+      <button @click="toggleShowAnotherComponent()">
+        Fetch data from another component
+      </button>
+
+      <Another v-if="showAnotherComponent"></Another>
     </div>
+
+    <h1>Posts</h1>
+    <pre>{{ posts }}</pre>
 
     <div v-if="error">
-      <h1>Error</h1>
+      <h2>Error</h2>
       <pre>{{ error }}</pre>
     </div>
+
+    <button @click="rerequest()">Rerequest data</button>
   </div>
 </template>
