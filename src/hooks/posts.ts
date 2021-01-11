@@ -15,11 +15,10 @@ export function usePosts() {
   };
 
   if (!postsCache.value) {
-    console.log("Fetching from server");
+    // Fetch from server
     request().then(() => (postsCache.value = data.value));
   } else {
     // Use posts cache
-    console.log("Using cache");
     data.value = postsCache.value;
   }
 

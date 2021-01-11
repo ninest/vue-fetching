@@ -61,11 +61,10 @@ export function usePosts() {
   };
 
   if (!postsCache.value) {
-    console.log("Fetching from server");
+    // Fetch from server
     request().then(() => (postsCache.value = data.value));
   } else {
     // Use posts cache
-    console.log("Using cache");
     data.value = postsCache.value;
   }
 
@@ -76,7 +75,6 @@ export function usePosts() {
     rerequest
   };
 }
-
 ```
 
 Whenever data is fetched, it is dumped into `postsCache`. So whe the same request is made again, it doesn not fetch it from the API. It only returns what was previous fetched.
@@ -120,3 +118,7 @@ export default defineComponent({
 ```
 
 Also see `src/App.vue`.
+
+## Things
+- Calling `rerequest()` from `usePosts()` updates the data in the current component and the posts cache
+- When `rerequest()` is called, the data in the current component is updated, but exisitng data in other components does not get updated
