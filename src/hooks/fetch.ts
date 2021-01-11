@@ -1,4 +1,4 @@
-import { ref, reactive, readonly, toRefs } from "vue";
+import { ref } from "vue";
 
 export function useFetch<T>(url: RequestInfo) {
   const data = ref<T | undefined>();
@@ -8,7 +8,9 @@ export function useFetch<T>(url: RequestInfo) {
   const request = async (): Promise<void> => {
     isLoading.value = true;
     try {
-      const response = await fetch(url);
+      const response = await fetch(
+        url + `&userId=${Math.floor(Math.random() * 6) + 1}`
+      );
       data.value = await response.json();
     } catch (e) {
       error.value = e;

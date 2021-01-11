@@ -1,4 +1,5 @@
 # Fetching in Vue 3
+
 > Different composables for fetching and caching data in Vue 3
 
 All examples are fetching a list of Posts from [JSON placeholder](https://jsonplaceholder.typicode.com/posts). Here's an interface for a post object:
@@ -15,48 +16,27 @@ interface Post {
 ## `useFetch`
 
 ```ts
-import { reactive, readonly, toRefs } from "vue";
+import { ref } from "vue";
 
-export function useFetch<T>(url: string) {
-  const state = reactive<{ data: T | null; error: any; isLoading: boolean }>({
-    data: null,
-    error: null,
-    isLoading: true
-  });
+export function useFetch<T>(url: RequestInfo) {
+  const data = ref<T | undefined>();
+  const error = ref<any>();
+  const isLoading = ref<boolean>(false);
 
-  fetch(url)
-    .then(response => response.json())
-    .then(data => {
-      state.data = data;
-      state.isLoading = false;
-    })
-    .catch(error => (state.error = error));
+  const request = async (): Promise<void> => {
+    isLoading.value = true;
+    try {
+      const response = await fetch(url);
+      data.value = await response.json();
+    } catch (e) {
+      error.value = e;
+    } finally {
+      isLoading.value = false;
+    }
+  };
 
-  return { ...toRefs(readonly(state)) };
+  return { data, error, isLoading, request };
 }
-```
-### Usage
-
-```ts
-<script setup lang="ts">
-import { useFetch } from "@/hooks/use-fetch";
-import { Post } from "@/post-interface";
-
-const { data: posts, error, isLoading } = useFetch<Post[]>(
-  "https://jsonplaceholder.typicode.com/posts"
-);
-</script>
-
-<template>
-  <div>
-    <h2 v-if="isLoading">Loading ...</h2>
-    <h1>Data</h1>
-    <pre>{{ posts }}</pre>
-    <h1>Error</h1>
-    <pre>{{ error }}</pre>
-  </div>
-</template>
-
 ```
 
 ## `usePosts`
@@ -65,37 +45,78 @@ This composable is a wrapper around `useFetch`
 
 ```ts
 import { Post } from "@/post-interface";
-import { useFetch } from "./use-fetch";
+import { ref } from "vue";
+import { useFetch } from "./fetch";
+
+const postsCache = ref<Post[] | undefined>(undefined);
 
 export function usePosts() {
-  const { data: posts, error, isLoading } = useFetch<Post[]>(
-    "https://jsonplaceholder.typicode.com/posts"
+  const { data, error, isLoading, request } = useFetch<Post[]>(
+    "https://jsonplaceholder.typicode.com/posts?_limit=2"
   );
 
+  const rerequest = () => {
+    // Required to properly update the cache on rerequest
+    request().then(() => (postsCache.value = data.value));
+  };
+
+  if (!postsCache.value) {
+    console.log("Fetching from server");
+    request().then(() => (postsCache.value = data.value));
+  } else {
+    // Use posts cache
+    console.log("Using cache");
+    data.value = postsCache.value;
+  }
+
   return {
-    posts,
+    posts: data,
     error,
-    isLoading
+    isLoading,
+    rerequest
   };
 }
+
 ```
 
-### Usage
-```ts
-<script setup lang="ts">
-import { usePosts } from "./hooks/use-posts";
-import { Post } from "@/post-interface";
+Whenever data is fetched, it is dumped into `postsCache`. So whe the same request is made again, it doesn not fetch it from the API. It only returns what was previous fetched.
 
-const { posts, error, isLoading } = usePosts();
+To fetch from the server again
+
+### Usage
+
+```ts
+<script lang="ts">
+import { defineComponent, ref } from "vue";
+import { usePosts } from "./hooks/posts";
+
+export default defineComponent({
+  components: { Another },
+  setup() {
+    const { posts, error, isLoading } = usePosts();
+
+    return {
+      posts,
+      error,
+      isLoading,
+    };
+  }
+});
 </script>
 
 <template>
   <div>
-    <h2 v-if="isLoading">Loading ...</h2>
-    <h1>Data</h1>
+    <div>Loading: {{ isLoading }}</div>
+
+    <h1>Posts</h1>
     <pre>{{ posts }}</pre>
-    <h1>Error</h1>
-    <pre>{{ error }}</pre>
+
+    <div v-if="error">
+      <h2>Error</h2>
+      <pre>{{ error }}</pre>
+    </div>
   </div>
 </template>
 ```
+
+Also see `src/App.vue`.

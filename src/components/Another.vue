@@ -8,6 +8,7 @@ export default defineComponent({
     const { posts, error, isLoading } = usePosts();
 
     return {
+      posts,
       isLoading,
       error
     };
@@ -18,7 +19,11 @@ export default defineComponent({
 <template>
   <div>
     <div v-if="isLoading">Fetching posts from another component</div>
-    <div v-else>Fetched posts from another component!</div>
+    <div v-else>
+      Fetched posts from another component!
+
+      <pre>{{ posts }}</pre>
+    </div>
     <div v-if="error">{{ error }}</div>
   </div>
 </template>
